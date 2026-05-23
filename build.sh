@@ -20,7 +20,7 @@ INCLUDE_DIR="$PROJECT_DIR/include"
 
 # Compiler flags
 CXX_FLAGS="-std=c++17 -Wall -Wextra -O2"
-INCLUDE_FLAGS="-I$INCLUDE_DIR"
+INCLUDE_FLAGS="-I$INCLUDE_DIR -I$PROJECT_DIR/external/header_only_libs"
 
 # Create build directory if it doesn't exist
 if [ ! -d "$BUILD_DIR" ]; then
@@ -30,12 +30,13 @@ fi
 
 # Function to compile and link
 compile_executable() {
-    local source_file=$1
-    local output_name=$2
+    local output_name=$1
+    shift
+    local source_files=("$@")
     
-    echo -e "${YELLOW}Compiling $source_file -> $output_name...${NC}"
+    echo -e "${YELLOW}Compiling ${source_files[@]} -> $output_name...${NC}"
     
-    if g++ $CXX_FLAGS $INCLUDE_FLAGS "$source_file" -o "$BUILD_DIR/$output_name"; then
+    if g++ $CXX_FLAGS $INCLUDE_FLAGS "${source_files[@]}" -o "$BUILD_DIR/$output_name"; then
         echo -e "${GREEN}✓ Successfully compiled $output_name${NC}"
     else
         echo -e "${RED}✗ Failed to compile $output_name${NC}"
@@ -44,11 +45,11 @@ compile_executable() {
 }
 
 # Compile main application
-compile_executable "$SRC_DIR"/*.cpp "main"
+compile_executable "main" "$SRC_DIR"/*.cpp
 
 # # Compile sample server (optional)
 # if [ -f "$SAMPLE_DIR/server.cpp" ]; then
-#     compile_executable "$SAMPLE_DIR/server.cpp" "server"
+#     compile_executable "server" "$SAMPLE_DIR/server.cpp"
 # fi
 
 echo ""
